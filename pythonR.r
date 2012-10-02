@@ -85,6 +85,7 @@ utilSubMat = function(i, x, dimn=1) {
     }
 }
 
+
 utilAssertEqualMat = function(m1, m2) {
     stopifnot(all(dim(m1) == dim(m2)))
     mapply(function(x1, x2) stopifnot(x1==x2), m1, m2)
