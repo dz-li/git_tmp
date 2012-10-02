@@ -43,34 +43,51 @@ ut_groupby = function() {
 }
     
 #
-# Unique, returning indices
+# Match 2D, returning indices
 #    
-utilUnique = function(xMat, dimn=1) {
-    uMat = unique(xMat, MARGIN=dimn)
+matchMat = function(xMat, uMat, dimn=1) {
     ind = rep(-1, dim(xMat)[dimn])
-    funMatch = function(uVect, xMat) {
-            apply(xMat, dimn, function(v) { 
-                tf = v == uVect
-                all(tf)
-            })
-        }
-        
     id = 1 : dim(uMat)[dimn]
     for (i in id) {
         e = utilSubMat(i, uMat, dimn)
-        isMatch = funMatch(e, xMat)
-        browser()
+        isMatch = matchVect(e, xMat, dimn)
         ind[isMatch] = i
     }
-    return(list(val=uMat, ind=ind))
+    return(ind)
 }
 
-ut_utilUnique = function() {
-    xMat = matrix(c(1, 2, 2, 3, 1, 2, 2, 4, 2, 3), ncol=2, byrow=T)
-    print(xMat)
-    rst = utilUnique(xMat)
-    #print(rst['val'])
-    #print(rst['ind'])
+#
+# wrong! Note merge/join does not keep the order of xMat
+#
+matchMatVer2 = function(xMat, uMat) {
+    stopifnot(dim(xMat)[2] == dim(uMat)[2])
+    id = 1 : dim(uMat)[1]
+    uMatId = cbind(uMat, id)
+    ind = merge(xMat, uMatId, by=1:dim(uMat)[2])$id
+    browser()
+}
+matchVect = function(v, xMat, dimn) {
+    apply(xMat, dimn, function(e) { 
+        tf = e == v 
+        all(tf)
+    })
+}
+     
+ut_matchMat = function() {
+    dimn = 1
+    uMat = matrix(c(1, 2, 2, 3, 3, 4, 4, 5), ncol=2, byrow=T)
+    ind = sample(dim(uMat)[1], 10, replace=T)
+    print(ind)
+    xMat = uMat[ind, ]
+    rst = matchMat(xMat, uMat, dimn)
+    print(rst)
+    stopifnot(all(ind == rst))
+
+    xMat2 = rbind(c(999, 999), xMat, c(888, 888))
+    rst2 = matchMat(xMat2, uMat, dimn)
+    print(rst2)
+    stopifnot(all(c(-1, ind, -1) == rst2))
+    print('pass!')
 }
 
 #
